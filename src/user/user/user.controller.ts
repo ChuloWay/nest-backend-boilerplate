@@ -2,12 +2,15 @@ import { Controller, Body, HttpStatus, Param, Res, Get, Post, Put, Delete } from
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { UpdateUserDto } from 'src/dto/update-user.dto';
 import { UserService } from './user.service';
+import { ApiTags, ApiResponse } from '@nestjs/swagger';
 
+@ApiTags('user')
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    @Get()
+    @Get('')
+    @ApiResponse({ status: 200, description: 'Return a list of users'})
     async index(@Res() response) {
       try {
         const UserData = await this.userService.findAll();
@@ -20,7 +23,8 @@ export class UserController {
           }
             };
 
-    @Post()
+    @Post('create')
+    @ApiResponse({ status: 200, description: 'Create a User'})
     async createUser(@Res() response, @Body() createUserDto: CreateUserDto) {
         try {
             const newUser = await this.userService.create(createUserDto);
@@ -38,7 +42,8 @@ export class UserController {
         }
     };
 
-    @Put('/:id')
+    @Put('edit/:id')
+    @ApiResponse({ status: 200, description: 'Update a User'})
     async updateUser(@Res() response, @Param('id') userId: string, 
     @Body() updateUserDto: UpdateUserDto) {
         try {
@@ -53,7 +58,8 @@ export class UserController {
         }
     }
 
-    @Delete('/:id')
+    @Delete('delete/:id')
+    @ApiResponse({ status: 200, description: 'Delete a User'})
     async deleteUser(@Res() response, @Param('id') userId: string) {
         try {
             const deletedUser = await this.userService.delete(userId);
