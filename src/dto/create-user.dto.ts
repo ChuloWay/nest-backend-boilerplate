@@ -10,6 +10,11 @@ export class CreateUserDto {
     @MaxLength(30)
     @IsNotEmpty()
     readonly lastname: string;
+
+    @IsString()
+    @MaxLength(10)
+    @IsNotEmpty()
+    readonly username: string;
     
     @IsString()
     @IsEmail()
@@ -19,6 +24,6 @@ export class CreateUserDto {
 
     @IsString()
     @IsNotEmpty()
-    readonly phone: string;
+     password: string;
 
 }
