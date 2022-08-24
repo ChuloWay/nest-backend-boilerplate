@@ -3,6 +3,8 @@ import { CreateUserDto } from 'src/dto/create-user.dto';
 import { UpdateUserDto } from 'src/dto/update-user.dto';
 import { UserService } from './user.service';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
+import * as bcrypt from 'bcrypt';
+
 
 @ApiTags('user')
 @Controller('user')
@@ -23,11 +25,35 @@ export class UserController {
           }
             };
 
+        @Get('one/:id')
+        @ApiResponse({ status: 200, description: 'Get Single User'})
+        async findUser(@Res() response, @Param('id') userId: string) {
+            try {
+                const user = await this.userService.getUser(userId);
+
+                return response.status(HttpStatus.OK).json({
+                    message: 'User Found',
+                    data: user
+                });
+            } catch (err) {
+                return response.status(err.status).json(err.response)
+            }
+        }
+
+
+
     @Post('create')
     @ApiResponse({ status: 200, description: 'Create a User'})
     async createUser(@Res() response, @Body() createUserDto: CreateUserDto) {
         try {
-            const newUser = await this.userService.create(createUserDto);
+            const { password } = createUserDto
+            const saltorRounds = 10;
+            const hashedPassword = await bcrypt.hash(password, saltorRounds);
+            createUserDto.password = hashedPassword;
+
+            const newUser = await this.userService.create(
+                createUserDto
+                );
 
             return response.status(HttpStatus.CREATED).json({
                 message:'New User', 

@@ -5,19 +5,31 @@ import { AppService } from './app.service';
 import { UserController } from './user/user/user.controller';
 import { UserService } from './user/user/user.service';
 import { UserSchema } from './model/user.schema';
+import { AuthModule } from './auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
+import configuration from './config/configuration';
+
 
 @Module({
     imports: [
-        MongooseModule.forRoot('mongodb://localhost', {
-            dbName: 'NestUser'
+        ConfigModule.forRoot({
+            isGlobal: true,
+            load: [configuration],
+            envFilePath: '.env'
+        }),
+        MongooseModule.forRoot( configuration().database.host, {
+            dbName:configuration().database.name
         }),
         MongooseModule.forFeature([{
             name: 'User',
             schema: UserSchema
-        }])
+        }]),
+        AuthModule,
+        JwtModule
     ],
     controllers: 
-    [AppController, UserController],
+    [AppController, UserController ],
     providers: [AppService, UserService],
 })
 export class AppModule {}
