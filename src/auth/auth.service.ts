@@ -1,37 +1,38 @@
+
 import { Injectable, NotAcceptableException } from '@nestjs/common';
-import { UserService } from 'src/user/user/user.service';
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
+
+
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private userService: UserService,
-    private jwtService: JwtService,
-  ) {}
+  constructor(private userService: UserService,
+    private jwtService: JwtService) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.userService.getUser(username);
+  async validTest(username: string, pass: string): Promise<any> {
+    const user = await this.userService.findByname(username);
     if (!user) return null;
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-      throw new NotAcceptableException('wrong credentials');
+    const isValid = await bcrypt.compare(pass, user.password);
+    if(!isValid) {
+        throw new NotAcceptableException('Wrong Credentials');
     }
-    if (user && validPassword) {
-      const { password, ...result } = user;
-      return result;
+    if (user && isValid ) {
+        const { password, ...result } = user;
+        return result;
     }
   }
 
-  getHello(): string {
-    return 'Hello World!';
-  }
-
+  
   async login(user: any) {
-
     const payload = { username: user.username, sub: user.userId };
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async register(user: any) {
+    return await this.userService.create(user)
   }
 }
