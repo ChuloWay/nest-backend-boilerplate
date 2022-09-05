@@ -3,33 +3,35 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SwaggerDocumentOptions } from './interface/swagger.interface';
-import { ExpressSwaggerCustomOptions} from './interface/swag.interface';
-import configuration from './config/configuration';
+import { ExpressSwaggerCustomOptions } from './interface/swag.interface';
+import dbConfig from './config/db.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe()); 
+  app.useGlobalPipes(new ValidationPipe());
 
   const config = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('User Application')
     .setDescription('User API Application')
     .setVersion('v1')
     .addTag('user')
     .build();
 
-    const options : SwaggerDocumentOptions = {
-      deepScanRoutes: true,
-    };
+  const options: SwaggerDocumentOptions = {
+    deepScanRoutes: true,
+  };
 
-    const document = SwaggerModule.createDocument(app, config, options);
+  const document = SwaggerModule.createDocument(app, config, options);
 
-    const customOptions: ExpressSwaggerCustomOptions = {
-      customSiteTitle: 'User API Docs'
-  }
-  
+  const customOptions: ExpressSwaggerCustomOptions = {
+    customSiteTitle: 'User API Docs',
+  };
 
-    SwaggerModule.setup('api', app, document, customOptions);
+  SwaggerModule.setup('api', app, document, customOptions);
 
-  await app.listen(configuration().port);
+
+  const port = dbConfig().port
+  await app.listen(port);
 }
 bootstrap();

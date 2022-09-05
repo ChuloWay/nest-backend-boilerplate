@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { MongooseModule } from '@nestjs/mongoose';
 import { AppService } from './app.service';
-import { UserController } from './user/user/user.controller';
-import { UserService } from './user/user/user.service';
-import { UserSchema } from './model/user.schema';
-import { AuthModule } from './auth/auth.module';
-import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
-import configuration from './config/configuration';
+import configuration from './config/db.config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from './user/user.module';
+import { UserService } from './user/user.service';
+import { AuthModule } from './auth/auth.module';
+import { UserEntity } from './model/user.entity';
 
 
 @Module({
@@ -18,18 +17,18 @@ import configuration from './config/configuration';
             load: [configuration],
             envFilePath: '.env'
         }),
-        MongooseModule.forRoot( configuration().database.host, {
-            dbName:configuration().database.name
+        TypeOrmModule.forRoot({
+            type:'sqlite',
+            database: 'db',
+            entities: [__dirname + '/**/*.entity{.ts,.js}'],
+            synchronize: true,  
         }),
-        MongooseModule.forFeature([{
-            name: 'User',
-            schema: UserSchema
-        }]),
-        AuthModule,
-        JwtModule
+        TypeOrmModule.forFeature([UserEntity]),  
+        UsersModule,
+        AuthModule
     ],
     controllers: 
-    [AppController, UserController ],
+    [AppController, ],
     providers: [AppService, UserService],
 })
 export class AppModule {}
